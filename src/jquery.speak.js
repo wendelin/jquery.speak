@@ -4,7 +4,7 @@
  * @see https://github.com/wendelin/jquery.speak/blob/master/LICENSE
  * @author Wendelin Thomas <wendelin.thomas@gmail.com>
  * @requires jquery
- *
+ * @module "jquery.speak"
  */
 (function (factory) {
 if (typeof define === "function" && define.amd) {
@@ -20,10 +20,9 @@ if (typeof define === "function" && define.amd) {
 	
 	var SpeechSynthesisVoice = window.SpeechSynthesisVoice || null;
 	
-	var allVoices = synth.getVoices && synth.getVoices ? synth.getVoices() : [];
-	
-	if (!synth || !allVoices.length) {
-		throw new Error("'speechSynthesis' not supported by browser");
+	if (!synth) {
+		// throw new Error("'speechSynthesis' not supported by browser");
+		if (console && console.warn) console.warn("'speechSynthesis' not supported by browser");
 		return false;
 	}
 	
@@ -31,7 +30,8 @@ if (typeof define === "function" && define.amd) {
 	 * @example $.speak("I'm sorry Dave, I'm afraid I can't do that", "en");
 	 * @example $.speak("I'm sorry Dave, I'm afraid I can't do that", {voice:{name:"Hysterical", lang:"en"}, pitch:0.6,rate:1.5});
 	 * 
-	 * @method "$.speak"
+	 * @global
+	 * @function "jquery.speak"
 	 * @param {String}  text              - Text to be spoken by the browser
 	 * @param {Object}  [o]               - Optional parameters
 	 * @param {Object}  [o.voice.name]    - Name of the voice to be used (e.g. "Bruce")
@@ -59,7 +59,7 @@ if (typeof define === "function" && define.amd) {
 		}
 		
 		// if (SpeechSynthesisVoice && o.voice && !(o.voice instanceof SpeechSynthesisVoice)) {		// Safari does not have window.SpeechSynthesisVoice but it has window.speechSynthesis.getVoices()
-		if (allVoices.length && o.voice) {
+		if (o.voice) {
 			var voice = FN.getVoice(o.voice);
 			
 			// If no voice with that name and lang exists fallback to first voices with that lang.
@@ -102,7 +102,7 @@ if (typeof define === "function" && define.amd) {
 	};
 	
 	/**
-	 * @function "$.speak.getVoices"
+	 * @function getVoices
 	 * @param {Object|String=} o - Filter options
 	 * @returns {Array}
 	 */
@@ -114,7 +114,7 @@ if (typeof define === "function" && define.amd) {
 			name = o.name;
 			lang = o.lang;
 		}
-		var voices = $.grep(allVoices, function(voice){
+		var voices = $.grep(synth.getVoices()||[], function(voice){
 			return (
 				(!name || voice.name.indexOf(name) !== -1)
 				&& (!lang || voice.lang.indexOf(lang) !== -1)
@@ -124,7 +124,7 @@ if (typeof define === "function" && define.amd) {
 	};
 	
 	/**
-	 * @function "$.speak.getVoice"
+	 * @function getVoice
 	 * @param {Object|String} [o] - Filter options
 	 * @returns {SpeechSynthesisVoice|Null}
 	 */
@@ -252,19 +252,19 @@ if (typeof define === "function" && define.amd) {
 	
 	//Passthrough access to speechSynthesis functions and properties.
 	/* 
-	 * @function "$.speak.pause"
+	 * @function pause
 	 */
 	 /**
-	 * @function "$.speak.paused"
+	 * @function paused
 	 */
 	 /**
-	 * @function "$.speak.resume"
+	 * @function resume
 	 */
 	 /**
-	 * @function "$.speak.cancel"
+	 * @function cancel
 	 */
 	 /**
-	 * @function "$.speak.speaking"
+	 * @function speaking
 	 */
 	$.each(["pause", "paused", "resume", "cancel", "speaking"], function(i, v) {
 		FN[v] = (
@@ -277,7 +277,7 @@ if (typeof define === "function" && define.amd) {
 	// $.isFunction(window.speechSynthesis.speaking);
 
 	/**
-	 * @constant {Object} "$.speak.DEFAULTS"
+	 * @constant {Object} DEFAULTS
 	 */
 	FN.DEFAULTS = {
 		pitch: 1,
